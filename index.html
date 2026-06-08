@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>张哲的爱情测试 - 部署版</title>
+  <title>张哲的爱情测试</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
@@ -15,6 +15,7 @@
       background: linear-gradient(135deg, #ffe4e4 0%, #e8f0ff 100%);
       font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
       padding: 20px;
+      overflow-x: hidden;
     }
     .card {
       background: #fff;
@@ -24,54 +25,106 @@
       max-width: 400px;
       text-align: center;
       box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+      position: relative;
+      overflow: hidden;
     }
     .icon { font-size: 56px; margin-bottom: 16px; line-height: 1; }
     h1 { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
     .sub { font-size: 14px; color: #999; margin-bottom: 28px; }
-    .question { font-size: 17px; font-weight: 600; color: #333; margin-bottom: 18px; line-height: 1.5; }
+
+    /* ===== 第一屏：填名字 ===== */
+    #nameScreen {}
+    .name-label { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 14px; }
+    .name-input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .name-input-row input {
+      flex: 1; padding: 13px 14px; border: 1.5px solid #e8e8e8;
+      border-radius: 10px; font-size: 15px; outline: none; color: #333;
+      transition: border-color 0.2s; -webkit-appearance: none;
+    }
+    .name-input-row input:focus { border-color: #e05c5c; }
+    .start-btn {
+      padding: 13px 20px; background: #e05c5c; color: #fff;
+      border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
+      cursor: pointer; white-space: nowrap;
+    }
+    .start-btn:active { background: #c94040; }
+    .name-hint { font-size: 12px; color: #ccc; }
+
+    /* ===== 第二屏：答题 ===== */
+    #quizScreen { display: none; }
+    .progress-bar-wrap {
+      background: #f5f5f5; border-radius: 99px; height: 6px;
+      margin-bottom: 22px; overflow: hidden;
+    }
+    .progress-bar {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, #e05c5c, #f0a0a0);
+      transition: width 0.4s ease;
+    }
+    .progress-label { font-size: 12px; color: #bbb; margin-bottom: 8px; text-align: right; }
+    .question-text { font-size: 17px; font-weight: 600; color: #333; margin-bottom: 22px; line-height: 1.6; min-height: 56px; }
     .quick-btns { display: flex; gap: 10px; margin-bottom: 14px; }
     .quick-btn {
-      flex: 1; padding: 13px 0; border-radius: 12px;
+      flex: 1; padding: 14px 0; border-radius: 12px;
       font-size: 15px; font-weight: 600; border: none; cursor: pointer;
-      transition: transform 0.1s; color: #fff;
+      transition: transform 0.1s, opacity 0.15s; color: #fff;
     }
     .quick-btn:active { transform: scale(0.96); }
     .btn-yes { background: #e05c5c; }
     .btn-no  { background: #5c89e0; }
     .divider { font-size: 12px; color: #ccc; margin-bottom: 14px; }
     .input-row { display: flex; gap: 8px; margin-bottom: 6px; }
-    input[type="text"] {
+    input#ans {
       flex: 1; padding: 12px 14px; border: 1.5px solid #e8e8e8;
       border-radius: 10px; font-size: 15px; outline: none; color: #333;
       transition: border-color 0.2s; -webkit-appearance: none;
     }
-    input[type="text"]:focus { border-color: #aaa; }
+    input#ans:focus { border-color: #aaa; }
     .confirm-btn {
       padding: 12px 18px; background: #333; color: #fff;
       border: none; border-radius: 10px; font-size: 15px;
-      cursor: pointer; white-space: nowrap; -webkit-appearance: none;
+      cursor: pointer; white-space: nowrap;
     }
     .confirm-btn:active { background: #555; }
     .hint { font-size: 12px; color: #ccc; margin-bottom: 4px; }
-    .result {
-      margin-top: 22px; padding: 20px 16px; border-radius: 16px;
-      display: none; animation: pop 0.35s cubic-bezier(.34,1.56,.64,1);
-    }
-    .result-yes { background: #fff0f0; }
-    .result-no  { background: #eef4ff; }
-    .result-emoji { font-size: 40px; margin-bottom: 8px; }
-    .result-text  { font-size: 22px; font-weight: 700; }
-    .result-yes .result-text { color: #c0392b; }
-    .result-no  .result-text { color: #2563eb; }
-    .result-sub { font-size: 13px; color: #aaa; margin-top: 6px; }
+
+    /* ===== 第三屏：结果 ===== */
+    #resultScreen { display: none; animation: pop 0.4s cubic-bezier(.34,1.56,.64,1); }
     @keyframes pop {
-      0% { transform: scale(0.7) translateY(10px); opacity: 0; }
-      100% { transform: scale(1) translateY(0); opacity: 1; }
+      0%  { transform: scale(0.7) translateY(10px); opacity: 0; }
+      100%{ transform: scale(1) translateY(0);      opacity: 1; }
     }
+    .result-box {
+      padding: 24px 16px; border-radius: 18px; margin-bottom: 18px;
+    }
+    .result-box.yes { background: #fff0f0; }
+    .result-box.no  { background: #eef4ff; }
+    .result-emoji { font-size: 52px; margin-bottom: 10px; }
+    .result-text  { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
+    .result-box.yes .result-text { color: #c0392b; }
+    .result-box.no  .result-text { color: #2563eb; }
+
+    /* 缘分仪表盘 */
+    .meter-wrap { margin: 14px 0 6px; }
+    .meter-label { font-size: 13px; color: #999; margin-bottom: 6px; }
+    .meter-bar-bg {
+      background: #f0f0f0; border-radius: 99px; height: 10px;
+      overflow: hidden; margin-bottom: 6px;
+    }
+    .meter-bar {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, #e05c5c, #f7b731);
+      transition: width 1s cubic-bezier(.17,.67,.35,1.1);
+      width: 0%;
+    }
+    .meter-pct { font-size: 28px; font-weight: 800; color: #e05c5c; }
+    .meter-desc { font-size: 13px; color: #aaa; margin-top: 4px; }
+
+    .result-sub { font-size: 13px; color: #aaa; margin-top: 10px; }
     .reset-btn {
-      margin-top: 18px; display: none; width: 100%; padding: 12px 0;
-      background: transparent; color: #aaa; border: 1.5px solid #eee;
-      border-radius: 10px; font-size: 14px; cursor: pointer;
+      width: 100%; padding: 13px 0; background: transparent;
+      color: #aaa; border: 1.5px solid #eee;
+      border-radius: 10px; font-size: 14px; cursor: pointer; margin-top: 4px;
     }
     .reset-btn:active { background: #f5f5f5; }
 
@@ -93,6 +146,20 @@
     }
     .copy-btn:active { background: #f0f0f0; }
     .copy-ok { color: #1D9E75 !important; border-color: #1D9E75 !important; }
+
+    /* ===== 撒花粒子 ===== */
+    .confetti-piece {
+      position: fixed;
+      width: 10px; height: 10px;
+      border-radius: 2px;
+      pointer-events: none;
+      z-index: 9999;
+      animation: confetti-fall linear forwards;
+    }
+    @keyframes confetti-fall {
+      0%   { transform: translateY(-20px) rotate(0deg);   opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+    }
   </style>
 </head>
 <body>
@@ -100,73 +167,218 @@
     <div class="icon">🎮</div>
     <h1>张哲的爱情测试</h1>
     <p class="sub">来测测你们之间的缘分吧</p>
-    <p class="question">你喜不喜欢玩暗区突围？</p>
 
-    <div class="quick-btns">
-      <button class="quick-btn btn-yes" onclick="answer('喜欢')">喜欢 👍</button>
-      <button class="quick-btn btn-no"  onclick="answer('不喜欢')">不喜欢 👎</button>
+    <!-- 第一屏：输入名字 -->
+    <div id="nameScreen">
+      <p class="name-label">你叫什么名字？</p>
+      <div class="name-input-row">
+        <input id="playerName" type="text" placeholder="输入你的名字…"
+               onkeydown="if(event.key==='Enter') startQuiz()">
+        <button class="start-btn" onclick="startQuiz()">开始测试 →</button>
+      </div>
+      <p class="name-hint">填完名字才能知道张哲爱不爱你哦</p>
     </div>
-    <p class="divider">— 或者自己输入 —</p>
-    <div class="input-row">
-      <input id="ans" type="text" placeholder="输入你的回答…"
-             onkeydown="if(event.key==='Enter') answer(this.value)">
-      <button class="confirm-btn" onclick="answer(document.getElementById('ans').value)">确认</button>
-    </div>
-    <p class="hint">直接点按钮，或自由输入</p>
-    <div id="result" class="result">
-      <div class="result-emoji" id="resEmoji"></div>
-      <div class="result-text"  id="resText"></div>
-      <div class="result-sub"   id="resSub"></div>
-    </div>
-    <button id="resetBtn" class="reset-btn" onclick="resetAll()">再来一次 ↩</button>
 
-    <!-- 分享给朋友 -->
-    <div class="share-section">
-      <p class="share-title">📤 把本页发给朋友一起玩</p>
-      <div class="share-url" id="shareUrl">加载中...</div>
-      <button class="copy-btn" id="copyBtn" onclick="copyLink()">复制链接</button>
+    <!-- 第二屏：答题 -->
+    <div id="quizScreen">
+      <p class="progress-label" id="progressLabel">1 / 5</p>
+      <div class="progress-bar-wrap">
+        <div class="progress-bar" id="progressBar" style="width:20%"></div>
+      </div>
+      <p class="question-text" id="questionText"></p>
+      <div class="quick-btns">
+        <button class="quick-btn btn-yes" id="btnYes" onclick="answer('yes')">喜欢 👍</button>
+        <button class="quick-btn btn-no"  id="btnNo"  onclick="answer('no')">不喜欢 👎</button>
+      </div>
+      <p class="divider">— 或者自己输入 —</p>
+      <div class="input-row">
+        <input id="ans" type="text" placeholder="输入你的回答…"
+               onkeydown="if(event.key==='Enter') answerText(this.value)">
+        <button class="confirm-btn" onclick="answerText(document.getElementById('ans').value)">确认</button>
+      </div>
+      <p class="hint">直接点按钮，或自由输入</p>
+    </div>
+
+    <!-- 第三屏：结果 -->
+    <div id="resultScreen">
+      <div class="result-box" id="resultBox">
+        <div class="result-emoji" id="resEmoji"></div>
+        <div class="result-text"  id="resText"></div>
+        <div class="meter-wrap">
+          <p class="meter-label">缘分指数</p>
+          <div class="meter-bar-bg"><div class="meter-bar" id="meterBar"></div></div>
+          <p class="meter-pct" id="meterPct">0%</p>
+          <p class="meter-desc" id="meterDesc"></p>
+        </div>
+        <div class="result-sub" id="resSub"></div>
+      </div>
+      <button class="reset-btn" onclick="resetAll()">再来一次 ↩</button>
+
+      <!-- 分享 -->
+      <div class="share-section">
+        <p class="share-title">📤 把本页发给朋友一起玩</p>
+        <div class="share-url" id="shareUrl">加载中...</div>
+        <button class="copy-btn" id="copyBtn" onclick="copyLink()">复制链接</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // 自动检测当前 URL 用于分享
+    // ===== 题库 =====
+    var QUESTIONS = [
+      {
+        text: '你喜不喜欢玩暗区突围？',
+        yesLabel: '喜欢 👍', noLabel: '不喜欢 👎',
+        weight: 30
+      },
+      {
+        text: '你喜欢吃辣吗？',
+        yesLabel: '超喜欢 🌶️', noLabel: '不喜欢 😅',
+        weight: 20
+      },
+      {
+        text: '你是夜猫子吗？晚上 12 点后还会刷手机？',
+        yesLabel: '当然 🌙', noLabel: '我早睡 😴',
+        weight: 20
+      },
+      {
+        text: '张哲问你：愿意一起打游戏吗？',
+        yesLabel: '愿意！🎮', noLabel: '不愿意 🚫',
+        weight: 15
+      },
+      {
+        text: '最后一题：你觉得张哲帅吗？',
+        yesLabel: '帅！😍', noLabel: '一般 😐',
+        weight: 15
+      }
+    ];
+
+    var playerName = '';
+    var currentQ = 0;
+    var yesCount = 0;
+    var totalWeight = 0;
+    var earnedWeight = 0;
+
+    // ===== 初始化分享链接 =====
     var currentUrl = window.location.href;
-    document.getElementById('shareUrl').textContent = currentUrl;
     if (currentUrl.startsWith('file://')) {
       document.getElementById('shareUrl').textContent = '请将此文件发给朋友，用浏览器打开即可';
+    } else {
+      document.getElementById('shareUrl').textContent = currentUrl;
     }
 
-    function answer(val) {
+    // ===== 开始测试 =====
+    function startQuiz() {
+      var n = document.getElementById('playerName').value.trim();
+      if (!n) { document.getElementById('playerName').focus(); return; }
+      playerName = n;
+      currentQ = 0; yesCount = 0; earnedWeight = 0;
+      totalWeight = QUESTIONS.reduce(function(s, q){ return s + q.weight; }, 0);
+      document.getElementById('nameScreen').style.display = 'none';
+      document.getElementById('quizScreen').style.display = 'block';
+      showQuestion();
+    }
+
+    function showQuestion() {
+      var q = QUESTIONS[currentQ];
+      document.getElementById('questionText').textContent = q.text;
+      document.getElementById('btnYes').textContent = q.yesLabel;
+      document.getElementById('btnNo').textContent  = q.noLabel;
+      document.getElementById('ans').value = '';
+      var pct = Math.round((currentQ + 1) / QUESTIONS.length * 100);
+      document.getElementById('progressBar').style.width = pct + '%';
+      document.getElementById('progressLabel').textContent = (currentQ + 1) + ' / ' + QUESTIONS.length;
+    }
+
+    function answer(type) {
+      var q = QUESTIONS[currentQ];
+      if (type === 'yes') { yesCount++; earnedWeight += q.weight; }
+      nextQuestion();
+    }
+
+    function answerText(val) {
       var x = (val || '').trim();
       if (!x) return;
-      document.getElementById('ans').value = x;
-      var box      = document.getElementById('result');
-      var emoji    = document.getElementById('resEmoji');
-      var text     = document.getElementById('resText');
-      var sub      = document.getElementById('resSub');
-      var resetBtn = document.getElementById('resetBtn');
-      box.style.display = 'none';
-      void box.offsetWidth;
-      if (x === '喜欢') {
-        box.className = 'result result-yes';
-        emoji.textContent = '❤️';
-        text.textContent  = '张哲爱你！';
-        sub.textContent   = '两个人都喜欢暗区突围，缘分天注定~';
+      var q = QUESTIONS[currentQ];
+      var yesKeywords = ['喜欢','是','对','好','要','帅','愿意','当然','超','很','爱'];
+      var isYes = yesKeywords.some(function(k){ return x.indexOf(k) !== -1; });
+      if (isYes) { yesCount++; earnedWeight += q.weight; }
+      nextQuestion();
+    }
+
+    function nextQuestion() {
+      currentQ++;
+      if (currentQ < QUESTIONS.length) {
+        showQuestion();
       } else {
-        box.className = 'result result-no';
-        emoji.textContent = '💙';
-        text.textContent  = '张哲不爱你';
-        sub.textContent   = '不玩游戏也没关系，爱情不止一种方式';
+        showResult();
       }
-      box.style.display = 'block';
-      resetBtn.style.display = 'block';
-      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
+
+    // ===== 显示结果 =====
+    function showResult() {
+      document.getElementById('quizScreen').style.display = 'none';
+      var rs = document.getElementById('resultScreen');
+      rs.style.display = 'block';
+
+      var pct = Math.round(earnedWeight / totalWeight * 100);
+      // 基础分 + 答题得分
+      pct = Math.min(100, Math.max(5, pct));
+
+      var box = document.getElementById('resultBox');
+      var emoji = document.getElementById('resEmoji');
+      var text  = document.getElementById('resText');
+      var sub   = document.getElementById('resSub');
+
+      if (yesCount >= Math.ceil(QUESTIONS.length / 2)) {
+        box.className  = 'result-box yes';
+        emoji.textContent = '❤️';
+        text.textContent  = '张哲爱' + playerName + '！';
+        sub.textContent   = '你们有那么多共同点，缘分天注定~';
+        setTimeout(function(){ launchConfetti(); }, 300);
+      } else {
+        box.className  = 'result-box no';
+        emoji.textContent = '💙';
+        text.textContent  = '张哲不爱' + playerName;
+        sub.textContent   = '差一点点哦，多了解张哲再来试试吧~';
+      }
+
+      // 缘分仪表盘动画
+      var desc = pct >= 80 ? '天作之合 💕' : pct >= 60 ? '缘分不浅 😊' : pct >= 40 ? '还需努力 💪' : '继续加油 🌱';
+      document.getElementById('meterDesc').textContent = desc;
+      setTimeout(function(){
+        document.getElementById('meterBar').style.width = pct + '%';
+        animateNumber('meterPct', 0, pct, 900);
+      }, 200);
+
+      rs.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function animateNumber(id, from, to, duration) {
+      var el = document.getElementById(id);
+      var start = null;
+      function step(ts) {
+        if (!start) start = ts;
+        var prog = Math.min((ts - start) / duration, 1);
+        var val = Math.round(from + (to - from) * prog);
+        el.textContent = val + '%';
+        if (prog < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    // ===== 重置 =====
     function resetAll() {
-      document.getElementById('ans').value = '';
-      document.getElementById('result').style.display = 'none';
-      document.getElementById('resetBtn').style.display = 'none';
+      playerName = ''; currentQ = 0; yesCount = 0; earnedWeight = 0;
+      document.getElementById('playerName').value = '';
+      document.getElementById('quizScreen').style.display = 'none';
+      document.getElementById('resultScreen').style.display = 'none';
+      document.getElementById('nameScreen').style.display = 'block';
+      document.getElementById('meterBar').style.width = '0%';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    // ===== 复制链接 =====
     function copyLink() {
       var url = window.location.href;
       if (url.startsWith('file://')) {
@@ -183,6 +395,33 @@
             btn.classList.remove('copy-ok');
           }, 2000);
         });
+      }
+    }
+
+    // ===== 撒花动画 =====
+    var CONFETTI_COLORS = ['#e05c5c','#f7b731','#5c89e0','#2ecc71','#9b59b6','#fd79a8','#fdcb6e'];
+    function launchConfetti() {
+      var count = 80;
+      for (var i = 0; i < count; i++) {
+        (function(delay) {
+          setTimeout(function() {
+            var el = document.createElement('div');
+            el.className = 'confetti-piece';
+            var size = 6 + Math.random() * 8;
+            el.style.cssText = [
+              'left:' + (Math.random() * 100) + 'vw',
+              'top:-20px',
+              'width:' + size + 'px',
+              'height:' + size + 'px',
+              'background:' + CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
+              'border-radius:' + (Math.random() > 0.5 ? '50%' : '2px'),
+              'animation-duration:' + (1.5 + Math.random() * 2) + 's',
+              'animation-delay:0s'
+            ].join(';');
+            document.body.appendChild(el);
+            setTimeout(function(){ el.remove(); }, 4000);
+          }, delay);
+        })(i * 25);
       }
     }
   </script>
