@@ -1,220 +1,351 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>张哲的爱情测试</title>
-  <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-    body {
-      min-height: 100vh;
-      min-height: 100dvh;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: linear-gradient(135deg, #ffe4e4 0%, #e8f0ff 100%);
-      font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
-      padding: 20px;
-      overflow-x: hidden;
-    }
-    .card {
-      background: #fff;
-      border-radius: 24px;
-      padding: 2.5rem 1.8rem 2rem;
-      width: 100%;
-      max-width: 400px;
-      text-align: center;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.10);
-      position: relative;
-      overflow: hidden;
-    }
-    .icon { font-size: 56px; margin-bottom: 16px; line-height: 1; }
-    h1 { font-size: 22px; font-weight: 700; color: #1a1a1a; margin-bottom: 6px; }
-    .sub { font-size: 14px; color: #999; margin-bottom: 28px; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>张哲的爱情测试</title>
+<style>
+:root{
+  --bg: linear-gradient(135deg,#ffe4e4 0%,#e8f0ff 100%);
+  --card-bg: #fff;
+  --card-shadow: 0 8px 32px rgba(0,0,0,0.10);
+  --text: #1a1a1a;
+  --text2: #999;
+  --text3: #333;
+  --text4: #ccc;
+  --border: #e8e8e8;
+  --bg2: #f8f8f8;
+  --bg3: #f5f5f5;
+  --divider: #f0f0f0;
+  --yes: #e05c5c;
+  --yes-dark: #c94040;
+  --no: #5c89e0;
+  --meter-bg: #f0f0f0;
+  --confetti-colors: #e05c5c,#f7b731,#5c89e0,#2ecc71,#9b59b6,#fd79a8,#fdcb6e;
+  --result-yes-bg: #fff0f0;
+  --result-no-bg: #eef4ff;
+  --result-yes-text: #c0392b;
+  --result-no-text: #2563eb;
+}
+body.dark{
+  --bg: #1a1a2e;
+  --card-bg: #16213e;
+  --card-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --text: #e0e0e0;
+  --text2: #888;
+  --text3: #ccc;
+  --text4: #666;
+  --border: #2a2a4a;
+  --bg2: #1a1a3e;
+  --bg3: #222244;
+  --divider: #2a2a4a;
+  --meter-bg: #2a2a4a;
+  --result-yes-bg: #2a1520;
+  --result-no-bg: #15202a;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{
+  min-height:100vh;min-height:100dvh;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--bg);
+  font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;
+  padding:20px;overflow-x:hidden;transition:background .3s;
+}
+.card{
+  background:var(--card-bg);border-radius:24px;
+  padding:2.5rem 1.4rem 2rem;width:100%;max-width:420px;
+  text-align:center;box-shadow:var(--card-shadow);
+  position:relative;overflow:hidden;transition:background .3s,box-shadow .3s;
+}
+.icon{font-size:56px;margin-bottom:16px;line-height:1}
+h1{font-size:22px;font-weight:700;color:var(--text);margin-bottom:6px;transition:color .3s}
+.sub{font-size:14px;color:var(--text2);margin-bottom:20px;transition:color .3s}
 
-    /* ===== 第一屏：填名字 ===== */
-    #nameScreen {}
-    .name-label { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 14px; }
-    .name-input-row { display: flex; gap: 8px; margin-bottom: 8px; }
-    .name-input-row input {
-      flex: 1; padding: 13px 14px; border: 1.5px solid #e8e8e8;
-      border-radius: 10px; font-size: 15px; outline: none; color: #333;
-      transition: border-color 0.2s; -webkit-appearance: none;
-    }
-    .name-input-row input:focus { border-color: #e05c5c; }
-    .start-btn {
-      padding: 13px 20px; background: #e05c5c; color: #fff;
-      border: none; border-radius: 10px; font-size: 15px; font-weight: 600;
-      cursor: pointer; white-space: nowrap;
-    }
-    .start-btn:active { background: #c94040; }
-    .name-hint { font-size: 12px; color: #ccc; }
+/* ===== 暗黑切换按钮 ===== */
+.dark-toggle{
+  position:absolute;top:12px;right:14px;
+  background:none;border:none;font-size:22px;cursor:pointer;
+  z-index:10;padding:4px;line-height:1;
+}
 
-    /* ===== 第二屏：答题 ===== */
-    #quizScreen { display: none; }
-    .progress-bar-wrap {
-      background: #f5f5f5; border-radius: 99px; height: 6px;
-      margin-bottom: 22px; overflow: hidden;
-    }
-    .progress-bar {
-      height: 100%; border-radius: 99px;
-      background: linear-gradient(90deg, #e05c5c, #f0a0a0);
-      transition: width 0.4s ease;
-    }
-    .progress-label { font-size: 12px; color: #bbb; margin-bottom: 8px; text-align: right; }
-    .question-text { font-size: 17px; font-weight: 600; color: #333; margin-bottom: 22px; line-height: 1.6; min-height: 56px; }
-    .quick-btns { display: flex; gap: 10px; margin-bottom: 14px; }
-    .quick-btn {
-      flex: 1; padding: 14px 0; border-radius: 12px;
-      font-size: 15px; font-weight: 600; border: none; cursor: pointer;
-      transition: transform 0.1s, opacity 0.15s; color: #fff;
-    }
-    .quick-btn:active { transform: scale(0.96); }
-    .btn-yes { background: #e05c5c; }
-    .btn-no  { background: #5c89e0; }
-    .divider { font-size: 12px; color: #ccc; margin-bottom: 14px; }
-    .input-row { display: flex; gap: 8px; margin-bottom: 6px; }
-    input#ans {
-      flex: 1; padding: 12px 14px; border: 1.5px solid #e8e8e8;
-      border-radius: 10px; font-size: 15px; outline: none; color: #333;
-      transition: border-color 0.2s; -webkit-appearance: none;
-    }
-    input#ans:focus { border-color: #aaa; }
-    .confirm-btn {
-      padding: 12px 18px; background: #333; color: #fff;
-      border: none; border-radius: 10px; font-size: 15px;
-      cursor: pointer; white-space: nowrap;
-    }
-    .confirm-btn:active { background: #555; }
-    .hint { font-size: 12px; color: #ccc; margin-bottom: 4px; }
+/* ===== 模式选择 Tab ===== */
+.mode-tabs{display:flex;gap:0;margin-bottom:20px;border-radius:10px;overflow:hidden;border:1.5px solid var(--border)}
+.mode-tab{
+  flex:1;padding:10px 0;border:none;background:transparent;
+  font-size:14px;font-weight:600;cursor:pointer;color:var(--text2);
+  transition:all .2s;
+}
+.mode-tab.active{background:var(--yes);color:#fff}
 
-    /* ===== 第三屏：结果 ===== */
-    #resultScreen { display: none; animation: pop 0.4s cubic-bezier(.34,1.56,.64,1); }
-    @keyframes pop {
-      0%  { transform: scale(0.7) translateY(10px); opacity: 0; }
-      100%{ transform: scale(1) translateY(0);      opacity: 1; }
-    }
-    .result-box {
-      padding: 24px 16px; border-radius: 18px; margin-bottom: 18px;
-    }
-    .result-box.yes { background: #fff0f0; }
-    .result-box.no  { background: #eef4ff; }
-    .result-emoji { font-size: 52px; margin-bottom: 10px; }
-    .result-text  { font-size: 26px; font-weight: 800; margin-bottom: 8px; }
-    .result-box.yes .result-text { color: #c0392b; }
-    .result-box.no  .result-text { color: #2563eb; }
+/* 第一屏：填名字 */
+.name-label{font-size:16px;font-weight:600;color:var(--text3);margin-bottom:14px;transition:color .3s}
+.name-input-row{display:flex;gap:8px;margin-bottom:8px}
+.name-input-row input{
+  flex:1;padding:13px 14px;border:1.5px solid var(--border);
+  border-radius:10px;font-size:15px;outline:none;color:var(--text3);
+  background:var(--card-bg);transition:border-color .2s,background .3s,color .3s;
+  -webkit-appearance:none;
+}
+.name-input-row input:focus{border-color:var(--yes)}
+.start-btn{
+  padding:13px 20px;background:var(--yes);color:#fff;
+  border:none;border-radius:10px;font-size:15px;font-weight:600;
+  cursor:pointer;white-space:nowrap;
+}
+.start-btn:active{background:var(--yes-dark)}
+.name-hint{font-size:12px;color:var(--text4);margin-bottom:4px;transition:color .3s}
 
-    /* 缘分仪表盘 */
-    .meter-wrap { margin: 14px 0 6px; }
-    .meter-label { font-size: 13px; color: #999; margin-bottom: 6px; }
-    .meter-bar-bg {
-      background: #f0f0f0; border-radius: 99px; height: 10px;
-      overflow: hidden; margin-bottom: 6px;
-    }
-    .meter-bar {
-      height: 100%; border-radius: 99px;
-      background: linear-gradient(90deg, #e05c5c, #f7b731);
-      transition: width 1s cubic-bezier(.17,.67,.35,1.1);
-      width: 0%;
-    }
-    .meter-pct { font-size: 28px; font-weight: 800; color: #e05c5c; }
-    .meter-desc { font-size: 13px; color: #aaa; margin-top: 4px; }
+/* 自定义题目 */
+.custom-toggle{
+  margin-top:16px;font-size:13px;color:var(--text2);cursor:pointer;
+  background:none;border:none;text-decoration:underline;transition:color .3s;
+}
+.custom-toggle:hover{color:var(--yes)}
+#customPanel{display:none;margin-top:12px;text-align:left}
+.custom-row{
+  margin-bottom:10px;background:var(--bg3);border-radius:10px;padding:10px 12px;transition:background .3s;
+}
+.custom-row label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px}
+.custom-row input{
+  width:100%;padding:8px 10px;border:1.5px solid var(--border);
+  border-radius:8px;font-size:13px;outline:none;color:var(--text3);
+  background:var(--card-bg);margin-bottom:4px;transition:background .3s,color .3s,border-color .2s;
+  -webkit-appearance:none;
+}
+.custom-row input:focus{border-color:var(--yes)}
+.custom-actions{display:flex;gap:8px;margin-top:8px}
+.custom-actions button{
+  flex:1;padding:8px 0;border-radius:8px;font-size:13px;border:1.5px solid var(--border);
+  background:var(--card-bg);color:var(--text2);cursor:pointer;transition:all .2s;
+}
+.custom-actions button:active{background:var(--bg3)}
 
-    .result-sub { font-size: 13px; color: #aaa; margin-top: 10px; }
-    .reset-btn {
-      width: 100%; padding: 13px 0; background: transparent;
-      color: #aaa; border: 1.5px solid #eee;
-      border-radius: 10px; font-size: 14px; cursor: pointer; margin-top: 4px;
-    }
-    .reset-btn:active { background: #f5f5f5; }
+/* 第二屏：答题 */
+#quizScreen,#coupleScreen{display:none}
+.progress-bar-wrap{
+  background:var(--meter-bg);border-radius:99px;height:6px;
+  margin-bottom:22px;overflow:hidden;transition:background .3s;
+}
+.progress-bar{
+  height:100%;border-radius:99px;
+  background:linear-gradient(90deg,var(--yes),#f0a0a0);
+  transition:width .4s ease;
+}
+.progress-label{font-size:12px;color:var(--text4);margin-bottom:8px;text-align:right;transition:color .3s}
+.question-text{font-size:17px;font-weight:600;color:var(--text3);margin-bottom:22px;line-height:1.6;min-height:56px;transition:color .3s}
+.quick-btns{display:flex;gap:10px;margin-bottom:14px}
+.quick-btn{
+  flex:1;padding:14px 0;border-radius:12px;
+  font-size:15px;font-weight:600;border:none;cursor:pointer;
+  transition:transform .1s,opacity .15s;color:#fff;
+}
+.quick-btn:active{transform:scale(.96)}
+.btn-yes{background:var(--yes)}
+.btn-no{background:var(--no)}
+.divider{font-size:12px;color:var(--text4);margin-bottom:14px;transition:color .3s}
+.input-row{display:flex;gap:8px;margin-bottom:6px}
+input#ans,input#ansCouple{
+  flex:1;padding:12px 14px;border:1.5px solid var(--border);
+  border-radius:10px;font-size:15px;outline:none;color:var(--text3);
+  background:var(--card-bg);transition:border-color .2s,background .3s,color .3s;
+  -webkit-appearance:none;
+}
+input#ans:focus,input#ansCouple:focus{border-color:#aaa}
+.confirm-btn{
+  padding:12px 18px;background:#333;color:#fff;
+  border:none;border-radius:10px;font-size:15px;
+  cursor:pointer;white-space:nowrap;
+}
+.confirm-btn:active{background:#555}
+.hint{font-size:12px;color:var(--text4);margin-bottom:4px;transition:color .3s}
 
-    /* 分享区 */
-    .share-section {
-      margin-top: 24px; padding-top: 20px;
-      border-top: 1px solid #f0f0f0;
-    }
-    .share-title { font-size: 13px; color: #999; margin-bottom: 12px; }
-    .share-url {
-      background: #f8f8f8; border-radius: 10px; padding: 10px 14px;
-      font-size: 11px; color: #777; word-break: break-all;
-      margin-bottom: 12px; font-family: monospace;
-    }
-    .copy-btn {
-      width: 100%; padding: 10px 0; border: 1.5px solid #ddd;
-      border-radius: 10px; background: #fff; font-size: 14px;
-      color: #555; cursor: pointer; transition: all 0.2s;
-    }
-    .copy-btn:active { background: #f0f0f0; }
-    .copy-ok { color: #1D9E75 !important; border-color: #1D9E75 !important; }
+/* 情侣切换提示 */
+.couple-switch-msg{
+  font-size:24px;font-weight:700;color:var(--yes);
+  padding:40px 20px;animation:pulse 1.5s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
 
-    /* ===== 撒花粒子 ===== */
-    .confetti-piece {
-      position: fixed;
-      width: 10px; height: 10px;
-      border-radius: 2px;
-      pointer-events: none;
-      z-index: 9999;
-      animation: confetti-fall linear forwards;
-    }
-    @keyframes confetti-fall {
-      0%   { transform: translateY(-20px) rotate(0deg);   opacity: 1; }
-      100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-    }
-  </style>
+/* 第三屏：结果 */
+#resultScreen,#resultCoupleScreen{display:none}
+@keyframes pop{0%{transform:scale(.7) translateY(10px);opacity:0}100%{transform:scale(1) translateY(0);opacity:1}}
+#resultScreen.show,#resultCoupleScreen.show{animation:pop .4s cubic-bezier(.34,1.56,.64,1)}
+.result-box{
+  padding:24px 16px;border-radius:18px;margin-bottom:18px;transition:background .3s;
+}
+.result-box.yes{background:var(--result-yes-bg)}
+.result-box.no{background:var(--result-no-bg)}
+.result-emoji{font-size:52px;margin-bottom:10px}
+.result-text{font-size:26px;font-weight:800;margin-bottom:8px}
+.result-box.yes .result-text{color:var(--result-yes-text)}
+.result-box.no .result-text{color:var(--result-no-text)}
+
+/* 仪表盘 */
+.meter-wrap{margin:14px 0 6px}
+.meter-label{font-size:13px;color:var(--text2);margin-bottom:6px;transition:color .3s}
+.meter-bar-bg{
+  background:var(--meter-bg);border-radius:99px;height:10px;
+  overflow:hidden;margin-bottom:6px;transition:background .3s;
+}
+.meter-bar{
+  height:100%;border-radius:99px;
+  background:linear-gradient(90deg,var(--yes),#f7b731);
+  transition:width 1s cubic-bezier(.17,.67,.35,1.1);width:0%;
+}
+.meter-pct{font-size:28px;font-weight:800;color:var(--yes)}
+.meter-desc{font-size:13px;color:var(--text2);margin-top:4px;transition:color .3s}
+.result-sub{font-size:13px;color:var(--text2);margin-top:10px;transition:color .3s}
+
+/* 雷达图 */
+.radar-wrap{margin:16px 0}
+.radar-wrap canvas{max-width:100%;height:auto}
+.radar-label{font-size:12px;color:var(--text2);margin-bottom:8px;transition:color .3s}
+
+/* 情书 */
+.love-letter-wrap{display:none;margin-top:16px;text-align:left}
+.love-letter{
+  background:var(--result-yes-bg);border-radius:16px;padding:20px 16px;
+  font-size:14px;line-height:1.8;color:var(--text3);max-height:200px;overflow-y:auto;transition:background .3s,color .3s;
+}
+.love-letter-actions{display:flex;gap:8px;margin-top:10px}
+.love-letter-actions button{
+  flex:1;padding:10px 0;border-radius:10px;font-size:13px;border:1.5px solid var(--border);
+  background:var(--card-bg);color:var(--text2);cursor:pointer;transition:all .2s;
+}
+.love-letter-actions button:active{background:var(--bg3)}
+
+/* 按钮区 */
+.actions-row{display:flex;gap:8px;margin-bottom:8px}
+.action-btn{
+  flex:1;padding:10px 0;border-radius:10px;font-size:13px;border:1.5px solid var(--border);
+  background:var(--card-bg);color:var(--yes);cursor:pointer;transition:all .2s;
+  font-weight:600;
+}
+.action-btn:active{background:var(--bg3)}
+.reset-btn{
+  width:100%;padding:13px 0;background:transparent;
+  color:var(--text2);border:1.5px solid var(--border);
+  border-radius:10px;font-size:14px;cursor:pointer;margin-top:4px;transition:all .2s;
+}
+.reset-btn:active{background:var(--bg3)}
+
+/* 分享区 */
+.share-section{
+  margin-top:24px;padding-top:20px;
+  border-top:1px solid var(--divider);transition:border-color .3s;
+}
+.share-title{font-size:13px;color:var(--text2);margin-bottom:12px;transition:color .3s}
+.share-url{
+  background:var(--bg2);border-radius:10px;padding:10px 14px;
+  font-size:11px;color:var(--text2);word-break:break-all;
+  margin-bottom:12px;font-family:monospace;transition:background .3s,color .3s;
+}
+.copy-btn{
+  width:100%;padding:10px 0;border:1.5px solid var(--border);
+  border-radius:10px;background:var(--card-bg);font-size:14px;
+  color:var(--text2);cursor:pointer;transition:all .2s;
+}
+.copy-btn:active{background:var(--bg3)}
+.copy-ok{color:#1D9E75!important;border-color:#1D9E75!important}
+
+/* 情侣对比 */
+.couple-compare{margin:16px 0}
+.couple-person{margin-bottom:12px}
+.couple-person-name{font-size:14px;font-weight:700;color:var(--text3);margin-bottom:4px}
+.couple-person .meter-bar-bg{height:8px}
+.match-pct{font-size:36px;font-weight:800;margin:12px 0 4px}
+.match-pct.high{color:var(--yes)}
+.match-pct.mid{color:#f7b731}
+.match-pct.low{color:var(--no)}
+.match-comment{font-size:14px;color:var(--text2);margin-bottom:6px}
+
+/* 撒花 */
+.confetti-piece{
+  position:fixed;width:10px;height:10px;border-radius:2px;
+  pointer-events:none;z-index:9999;animation:confetti-fall linear forwards;
+}
+@keyframes confetti-fall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(110vh) rotate(720deg);opacity:0}}
+
+/* 音乐按钮 */
+.music-btn{
+  position:absolute;top:12px;left:14px;
+  background:none;border:none;font-size:22px;cursor:pointer;
+  z-index:10;padding:4px;line-height:1;
+}
+.music-btn.muted{opacity:.4}
+</style>
 </head>
 <body>
-  <div class="card">
-    <div class="icon">🎮</div>
-    <h1>张哲的爱情测试</h1>
-    <p class="sub">来测测你们之间的缘分吧</p>
+<div class="card">
+  <button class="dark-toggle" id="darkBtn" onclick="toggleDark()" title="切换暗黑模式">🌙</button>
+  <button class="music-btn" id="musicBtn" onclick="toggleMusic()" title="背景音乐">🔊</button>
+  <div class="icon">🎮</div>
+  <h1>张哲的爱情测试</h1>
+  <p class="sub">来测测你们之间的缘分吧</p>
 
-    <!-- 第一屏：输入名字 -->
-    <div id="nameScreen">
+  <!-- ========== 单人模式 ========== -->
+  <div id="singleMode">
+    <!-- 模式 Tab -->
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tabSingle" onclick="switchMode('single')">单人模式</button>
+      <button class="mode-tab" id="tabCouple" onclick="switchMode('couple')">情侣模式</button>
+    </div>
+
+    <!-- 名字 -->
+    <div id="nameScreen"><div>
       <p class="name-label">你叫什么名字？</p>
       <div class="name-input-row">
-        <input id="playerName" type="text" placeholder="输入你的名字…"
-               onkeydown="if(event.key==='Enter') startQuiz()">
+        <input id="playerName" type="text" placeholder="输入你的名字…" onkeydown="if(event.key==='Enter')startQuiz()">
         <button class="start-btn" onclick="startQuiz()">开始测试 →</button>
       </div>
       <p class="name-hint">填完名字才能知道张哲爱不爱你哦</p>
-    </div>
+      <button class="custom-toggle" onclick="toggleCustom()">⚙ 自定义题目</button>
+      <div id="customPanel"></div>
+    </div></div>
 
-    <!-- 第二屏：答题 -->
+    <!-- 答题 -->
     <div id="quizScreen">
       <p class="progress-label" id="progressLabel">1 / 5</p>
-      <div class="progress-bar-wrap">
-        <div class="progress-bar" id="progressBar" style="width:20%"></div>
-      </div>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="progressBar" style="width:20%"></div></div>
       <p class="question-text" id="questionText"></p>
       <div class="quick-btns">
-        <button class="quick-btn btn-yes" id="btnYes" onclick="answer('yes')">喜欢 👍</button>
-        <button class="quick-btn btn-no"  id="btnNo"  onclick="answer('no')">不喜欢 👎</button>
+        <button class="quick-btn btn-yes" id="btnYes" onclick="answer('yes')"></button>
+        <button class="quick-btn btn-no" id="btnNo" onclick="answer('no')"></button>
       </div>
       <p class="divider">— 或者自己输入 —</p>
       <div class="input-row">
-        <input id="ans" type="text" placeholder="输入你的回答…"
-               onkeydown="if(event.key==='Enter') answerText(this.value)">
+        <input id="ans" type="text" placeholder="输入你的回答…" onkeydown="if(event.key==='Enter')answerText(this.value)">
         <button class="confirm-btn" onclick="answerText(document.getElementById('ans').value)">确认</button>
       </div>
       <p class="hint">直接点按钮，或自由输入</p>
     </div>
 
-    <!-- 第三屏：结果 -->
+    <!-- 结果 -->
     <div id="resultScreen">
       <div class="result-box" id="resultBox">
         <div class="result-emoji" id="resEmoji"></div>
-        <div class="result-text"  id="resText"></div>
+        <div class="result-text" id="resText"></div>
         <div class="meter-wrap">
           <p class="meter-label">缘分指数</p>
           <div class="meter-bar-bg"><div class="meter-bar" id="meterBar"></div></div>
           <p class="meter-pct" id="meterPct">0%</p>
           <p class="meter-desc" id="meterDesc"></p>
         </div>
+        <div class="radar-wrap"><p class="radar-label">答题详情</p><canvas id="radarCanvas" width="300" height="300"></canvas></div>
         <div class="result-sub" id="resSub"></div>
       </div>
+      <div class="actions-row">
+        <button class="action-btn" onclick="genLoveLetter()">💌 生成情书</button>
+        <button class="action-btn" onclick="savePoster()">🖼 保存海报</button>
+      </div>
+      <div class="love-letter-wrap" id="loveLetterWrap">
+        <div class="love-letter" id="loveLetter"></div>
+        <div class="love-letter-actions">
+          <button onclick="copyLetter()">复制情书</button>
+          <button onclick="document.getElementById('loveLetterWrap').style.display='none'">收起</button>
+        </div>
+      </div>
       <button class="reset-btn" onclick="resetAll()">再来一次 ↩</button>
-
-      <!-- 分享 -->
       <div class="share-section">
         <p class="share-title">📤 把本页发给朋友一起玩</p>
         <div class="share-url" id="shareUrl">加载中...</div>
@@ -223,207 +354,474 @@
     </div>
   </div>
 
-  <script>
-    // ===== 题库 =====
-    var QUESTIONS = [
-      {
-        text: '你喜不喜欢玩暗区突围？',
-        yesLabel: '喜欢 👍', noLabel: '不喜欢 👎',
-        weight: 30
-      },
-      {
-        text: '你喜欢吃辣吗？',
-        yesLabel: '超喜欢 🌶️', noLabel: '不喜欢 😅',
-        weight: 20
-      },
-      {
-        text: '你是夜猫子吗？晚上 12 点后还会刷手机？',
-        yesLabel: '当然 🌙', noLabel: '我早睡 😴',
-        weight: 20
-      },
-      {
-        text: '张哲问你：愿意一起打游戏吗？',
-        yesLabel: '愿意！🎮', noLabel: '不愿意 🚫',
-        weight: 15
-      },
-      {
-        text: '最后一题：你觉得张哲帅吗？',
-        yesLabel: '帅！😍', noLabel: '一般 😐',
-        weight: 15
-      }
-    ];
+  <!-- ========== 情侣模式 ========== -->
+  <div id="coupleMode" style="display:none">
+    <div class="mode-tabs">
+      <button class="mode-tab" id="tabSingle2" onclick="switchMode('single')">单人模式</button>
+      <button class="mode-tab active" id="tabCouple2" onclick="switchMode('couple')">情侣模式</button>
+    </div>
 
-    var playerName = '';
-    var currentQ = 0;
-    var yesCount = 0;
-    var totalWeight = 0;
-    var earnedWeight = 0;
+    <!-- 第一个人 -->
+    <div id="coupleScreen1">
+      <p class="name-label">第一位：你叫什么名字？</p>
+      <div class="name-input-row">
+        <input id="cpName1" type="text" placeholder="输入第一位名字…" onkeydown="if(event.key==='Enter')startCouple1()">
+        <button class="start-btn" onclick="startCouple1()">开始 →</button>
+      </div>
+    </div>
 
-    // ===== 初始化分享链接 =====
-    var currentUrl = window.location.href;
-    if (currentUrl.startsWith('file://')) {
-      document.getElementById('shareUrl').textContent = '请将此文件发给朋友，用浏览器打开即可';
-    } else {
-      document.getElementById('shareUrl').textContent = currentUrl;
+    <!-- 第一个答题 -->
+    <div id="coupleQuiz1" style="display:none">
+      <p class="progress-label" id="cpProgressLabel">1 / 5</p>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="cpProgressBar" style="width:20%"></div></div>
+      <p class="question-text" id="cpQuestionText"></p>
+      <div class="quick-btns">
+        <button class="quick-btn btn-yes" id="cpBtnYes" onclick="cpAnswer('yes')"></button>
+        <button class="quick-btn btn-no" id="cpBtnNo" onclick="cpAnswer('no')"></button>
+      </div>
+      <p class="divider">— 或者自己输入 —</p>
+      <div class="input-row">
+        <input id="ansCouple" type="text" placeholder="输入你的回答…" onkeydown="if(event.key==='Enter')cpAnswerText(this.value)">
+        <button class="confirm-btn" onclick="cpAnswerText(document.getElementById('ansCouple').value)">确认</button>
+      </div>
+    </div>
+
+    <!-- 交接提示 + 第二个人 -->
+    <div id="coupleSwitch" style="display:none">
+      <div class="couple-switch-msg">📱 请把手机交给第二个人！</div>
+      <button class="start-btn" onclick="startCouple2()" style="margin-top:16px">第二个人：开始 →</button>
+    </div>
+
+    <!-- 第二个答题 -->
+    <div id="coupleQuiz2" style="display:none">
+      <p class="progress-label" id="cp2ProgressLabel">1 / 5</p>
+      <div class="progress-bar-wrap"><div class="progress-bar" id="cp2ProgressBar" style="width:20%"></div></div>
+      <p class="question-text" id="cp2QuestionText"></p>
+      <div class="quick-btns">
+        <button class="quick-btn btn-yes" id="cp2BtnYes" onclick="cp2Answer('yes')"></button>
+        <button class="quick-btn btn-no" id="cp2BtnNo" onclick="cp2Answer('no')"></button>
+      </div>
+      <p class="divider">— 或者自己输入 —</p>
+      <div class="input-row">
+        <input id="ansCouple2" type="text" placeholder="输入你的回答…" onkeydown="if(event.key==='Enter')cp2AnswerText(this.value)">
+        <button class="confirm-btn" onclick="cp2AnswerText(document.getElementById('ansCouple2').value)">确认</button>
+      </div>
+    </div>
+
+    <!-- 情侣结果 -->
+    <div id="resultCoupleScreen">
+      <div class="result-box" style="text-align:center">
+        <div class="result-emoji" id="cpResEmoji"></div>
+        <div class="couple-compare">
+          <div class="couple-person">
+            <p class="couple-person-name" id="cpName1Display"></p>
+            <div class="meter-bar-bg"><div class="meter-bar" id="cpMeter1" style="width:0%"></div></div>
+            <p style="font-size:13px;color:var(--text2)" id="cpPct1Display">0%</p>
+          </div>
+          <div class="couple-person">
+            <p class="couple-person-name" id="cpName2Display"></p>
+            <div class="meter-bar-bg"><div class="meter-bar" id="cpMeter2" style="width:0%"></div></div>
+            <p style="font-size:13px;color:var(--text2)" id="cpPct2Display">0%</p>
+          </div>
+        </div>
+        <p class="match-pct" id="cpMatchPct">0%</p>
+        <p style="font-size:13px;color:var(--text2);margin-bottom:6px">两人契合度</p>
+        <p class="match-comment" id="cpMatchComment"></p>
+        <div class="result-sub" id="cpResSub"></div>
+      </div>
+      <button class="reset-btn" onclick="resetCouple()">再来一次 ↩</button>
+      <div class="share-section">
+        <p class="share-title">📤 把本页发给朋友一起玩</p>
+        <div class="share-url" id="cpShareUrl">加载中...</div>
+        <button class="copy-btn" id="cpCopyBtn" onclick="copyLink()">复制链接</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============ 题库管理 ============ */
+var DEFAULT_QUESTIONS = [
+  {text:'你喜不喜欢玩暗区突围？',yesLabel:'喜欢 👍',noLabel:'不喜欢 👎',weight:30},
+  {text:'你喜欢吃辣吗？',yesLabel:'超喜欢 🌶️',noLabel:'不喜欢 😅',weight:20},
+  {text:'你是夜猫子吗？晚上12点后还会刷手机？',yesLabel:'当然 🌙',noLabel:'我早睡 😴',weight:20},
+  {text:'张哲问你：愿意一起打游戏吗？',yesLabel:'愿意！🎮',noLabel:'不愿意 🚫',weight:15},
+  {text:'最后一题：你觉得张哲帅吗？',yesLabel:'帅！😍',noLabel:'一般 😐',weight:15}
+];
+
+function loadQuestions(){
+  try{var s=localStorage.getItem('love_test_questions');if(s)return JSON.parse(s)}catch(e){}
+  return JSON.parse(JSON.stringify(DEFAULT_QUESTIONS));
+}
+function saveQuestions(q){localStorage.setItem('love_test_questions',JSON.stringify(q))}
+
+var QUESTIONS=loadQuestions();
+var YES_KW=['喜欢','是','对','好','要','帅','愿意','当然','超','很','爱'];
+
+/* ============ 暗黑模式 ============ */
+function toggleDark(){
+  var b=document.body;b.classList.toggle('dark');
+  var is=b.classList.contains('dark');
+  document.getElementById('darkBtn').textContent=is?'☀️':'🌙';
+  localStorage.setItem('love_test_dark',is?'1':'0');
+}
+(function(){
+  if(localStorage.getItem('love_test_dark')==='1'){
+    document.body.classList.add('dark');document.getElementById('darkBtn').textContent='☀️';
+  }
+})();
+
+/* ============ 背景音乐 (Web Audio API) ============ */
+var musicOn=true;var audioCtx=null;var musicTimer=null;
+function initAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)()}
+function playNote(freq,dur,start,vol){
+  initAudio();var o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type='sine';o.frequency.value=freq;g.gain.setValueAtTime(vol*0.15,start);
+  g.gain.exponentialRampToValueAtTime(0.001,start+dur);
+  o.connect(g);g.connect(audioCtx.destination);o.start(start);o.stop(start+dur);
+}
+var MELODY=[262,294,330,349,392,349,330,294,262,330,392,440,392,349,330,294];
+function playMelody(){
+  if(!musicOn)return;initAudio();var t=audioCtx.currentTime;
+  MELODY.forEach(function(f,i){playNote(f,.3,t+i*0.35,1)});
+  musicTimer=setTimeout(playMelody,MELODY.length*350+800);
+}
+function stopMusic(){if(musicTimer){clearTimeout(musicTimer);musicTimer=null}}
+function playResultFanfare(){
+  initAudio();var t=audioCtx.currentTime;
+  [523,659,784,1047].forEach(function(f,i){playNote(f,.4,t+i*0.15,1.2)});
+}
+function toggleMusic(){
+  musicOn=!musicOn;var b=document.getElementById('musicBtn');
+  b.textContent=musicOn?'🔊':'🔇';b.classList.toggle('muted',!musicOn);
+  if(musicOn){stopMusic();playMelody()}else stopMusic()
+}
+
+/* ============ 模式切换 ============ */
+function switchMode(m){
+  if(m==='single'){
+    document.getElementById('singleMode').style.display='block';
+    document.getElementById('coupleMode').style.display='none';
+    document.getElementById('tabSingle').classList.add('active');
+    document.getElementById('tabCouple').classList.remove('active');
+  }else{
+    document.getElementById('singleMode').style.display='none';
+    document.getElementById('coupleMode').style.display='block';
+    document.getElementById('tabSingle2').classList.add('active');
+    document.getElementById('tabCouple2').classList.add('active');
+  }
+}
+
+/* ============ 自定义题目面板 ============ */
+function toggleCustom(){
+  var p=document.getElementById('customPanel');
+  if(p.style.display==='block'){p.style.display='none';return}
+  p.style.display='block';p.innerHTML='';
+  QUESTIONS.forEach(function(q,i){
+    var d=document.createElement('div');d.className='custom-row';
+    d.innerHTML='<label>第'+(i+1)+'题</label>'+
+      '<input placeholder="题目" value="'+escHtml(q.text)+'" data-i="'+i+'" data-f="text">'+
+      '<input placeholder="喜欢标签" value="'+escHtml(q.yesLabel)+'" data-i="'+i+'" data-f="yesLabel" style="width:48%;display:inline-block;margin-right:4%">'+
+      '<input placeholder="不喜欢标签" value="'+escHtml(q.noLabel)+'" data-i="'+i+'" data-f="noLabel" style="width:48%;display:inline-block">';
+    p.appendChild(d);
+  });
+  var act=document.createElement('div');act.className='custom-actions';
+  act.innerHTML='<button onclick="applyCustom()">保存题目</button><button onclick="resetCustom()">恢复默认</button>';
+  p.appendChild(act);
+}
+function escHtml(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function applyCustom(){
+  var ins=document.querySelectorAll('#customPanel input[data-f]');
+  ins.forEach(function(inp){
+    var i=parseInt(inp.dataset.i),f=inp.dataset.f;
+    if(f==='text')QUESTIONS[i].text=inp.value;
+    else if(f==='yesLabel')QUESTIONS[i].yesLabel=inp.value;
+    else if(f==='noLabel')QUESTIONS[i].noLabel=inp.value;
+  });
+  saveQuestions(QUESTIONS);
+  document.getElementById('customPanel').style.display='none';
+}
+function resetCustom(){
+  QUESTIONS=JSON.parse(JSON.stringify(DEFAULT_QUESTIONS));
+  saveQuestions(QUESTIONS);
+  toggleCustom();toggleCustom();
+}
+
+/* ============ 雷达图 ============ */
+function drawRadar(canvasId,scores,labels){
+  var c=document.getElementById(canvasId),ctx=c.getContext('2d');
+  var w=300,h=300,cx=150,cy=150,r=110;
+  ctx.clearRect(0,0,w,h);
+  var n=scores.length,angleStep=Math.PI*2/n;
+  // 网格
+  for(var l=1;l<=5;l++){
+    ctx.beginPath();
+    for(var i=0;i<=n;i++){
+      var a=i*angleStep-Math.PI/2;
+      var x=cx+Math.cos(a)*r*(l/5),y=cy+Math.sin(a)*r*(l/5);
+      if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
     }
+    ctx.closePath();ctx.strokeStyle='#e0e0e0';ctx.lineWidth=.5;ctx.stroke();
+  }
+  // 轴线
+  for(var i=0;i<n;i++){
+    var a=i*angleStep-Math.PI/2;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+    ctx.strokeStyle='#e0e0e0';ctx.lineWidth=.5;ctx.stroke();
+  }
+  // 数据多边形
+  ctx.beginPath();
+  for(var i=0;i<n;i++){
+    var a=i*angleStep-Math.PI/2;
+    var v=Math.max(0.05,scores[i]/100);
+    var x=cx+Math.cos(a)*r*v,y=cy+Math.sin(a)*r*v;
+    if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);
+  }
+  ctx.closePath();ctx.fillStyle='rgba(224,92,92,0.25)';ctx.fill();ctx.strokeStyle='#e05c5c';ctx.lineWidth=1.5;ctx.stroke();
+  // 标签
+  for(var i=0;i<n;i++){
+    var a=i*angleStep-Math.PI/2;
+    var x=cx+Math.cos(a)*(r+25),y=cy+Math.sin(a)*(r+25);
+    ctx.font='13px "PingFang SC","Microsoft YaHei",sans-serif';ctx.fillStyle='#666';ctx.textAlign='center';ctx.textBaseline='middle';
+    ctx.fillText(labels[i],x,y);
+  }
+}
 
-    // ===== 开始测试 =====
-    function startQuiz() {
-      var n = document.getElementById('playerName').value.trim();
-      if (!n) { document.getElementById('playerName').focus(); return; }
-      playerName = n;
-      currentQ = 0; yesCount = 0; earnedWeight = 0;
-      totalWeight = QUESTIONS.reduce(function(s, q){ return s + q.weight; }, 0);
-      document.getElementById('nameScreen').style.display = 'none';
-      document.getElementById('quizScreen').style.display = 'block';
-      showQuestion();
-    }
+/* ============ 撒花 ============ */
+var CC=['#e05c5c','#f7b731','#5c89e0','#2ecc71','#9b59b6','#fd79a8','#fdcb6e'];
+function launchConfetti(){
+  for(var i=0;i<80;i++){(function(d){setTimeout(function(){
+    var e=document.createElement('div');e.className='confetti-piece';
+    var s=6+Math.random()*8;
+    e.style.cssText='left:'+(Math.random()*100)+'vw;top:-20px;width:'+s+'px;height:'+s+'px;background:'+CC[Math.floor(Math.random()*CC.length)]+';border-radius:'+(Math.random()>.5?'50%':'2px')+';animation-duration:'+(1.5+Math.random()*2)+'s';
+    document.body.appendChild(e);setTimeout(function(){e.remove()},4000);
+  },d)})(i*25)}
+}
 
-    function showQuestion() {
-      var q = QUESTIONS[currentQ];
-      document.getElementById('questionText').textContent = q.text;
-      document.getElementById('btnYes').textContent = q.yesLabel;
-      document.getElementById('btnNo').textContent  = q.noLabel;
-      document.getElementById('ans').value = '';
-      var pct = Math.round((currentQ + 1) / QUESTIONS.length * 100);
-      document.getElementById('progressBar').style.width = pct + '%';
-      document.getElementById('progressLabel').textContent = (currentQ + 1) + ' / ' + QUESTIONS.length;
-    }
+/* ============ 情书生成 ============ */
+var LETTERS=null;
+function genLoveLetter(){
+  var isYes=document.getElementById('resultBox').classList.contains('yes');
+  var name=playerName||'你';
+  var pct=parseInt(document.getElementById('meterPct').textContent);
+  var love='';
+  if(isYes){
+    love='亲爱的'+name+'：\n\n从你回答第一道题的那一刻起，我就知道——你一定是对的人。\n\n你喜欢暗区突围，我也喜欢。你喜欢吃辣，我陪你吃。你是夜猫子，我陪你熬夜。你愿意和我打游戏，那我们就双排到天亮。\n\n最让我开心的是——你说我帅。\n\n其实帅不帅不重要，重要的是你的眼里有我。\n\n我们的缘分指数高达'+pct+'%，这不是数字，是注定。\n\n—— 张哲';
+  }else{
+    love='嘿，'+name+'：\n\n好吧，你可能对暗区突围没什么兴趣，也不吃辣，早睡早起，还说我不帅...\n\n但没关系！\n\n爱情的妙处就在于——有时候最不一样的两颗心，反而能碰撞出最亮的火花。\n\n缘分指数只有'+pct+'%？那不是低，那是还有很大进步空间。\n\n要不，我们再测一次？说不定这次你就喜欢上暗区突围了呢。\n\n—— 还是那个爱笑的张哲';
+  }
+  LETTERS=love;
+  document.getElementById('loveLetter').textContent=love;
+  document.getElementById('loveLetterWrap').style.display='block';
+  document.getElementById('loveLetterWrap').scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+function copyLetter(){
+  if(!LETTERS)return;
+  navigator.clipboard.writeText(LETTERS).then(function(){alert('情书已复制！💌')});
+}
 
-    function answer(type) {
-      var q = QUESTIONS[currentQ];
-      if (type === 'yes') { yesCount++; earnedWeight += q.weight; }
-      nextQuestion();
-    }
+/* ============ 海报保存 ============ */
+function savePoster(){
+  var cv=document.createElement('canvas');cv.width=500;cv.height=700;
+  var ctx=cv.getContext('2d');
+  var g=ctx.createLinearGradient(0,0,500,700);g.addColorStop(0,'#ffe4e4');g.addColorStop(1,'#e8f0ff');
+  ctx.fillStyle=g;ctx.fillRect(0,0,500,700);
+  // 白色卡片
+  ctx.fillStyle='#fff';ctx.shadowColor='rgba(0,0,0,0.1)';ctx.shadowBlur=20;
+  roundRect(ctx,40,60,420,480,20);ctx.fill();
+  ctx.shadowColor='transparent';ctx.shadowBlur=0;
+  // 内容
+  var isYes=document.getElementById('resultBox').classList.contains('yes');
+  var emoji=document.getElementById('resEmoji').textContent;
+  var text=document.getElementById('resText').textContent;
+  var pct=document.getElementById('meterPct').textContent;
+  var desc=document.getElementById('meterDesc').textContent;
+  var sub=document.getElementById('resSub').textContent;
+  ctx.fillStyle='#333';ctx.font='bold 40px "PingFang SC","Microsoft YaHei",sans-serif';ctx.textAlign='center';
+  ctx.fillText(emoji,250,150);
+  ctx.font='bold 32px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillStyle=isYes?'#c0392b':'#2563eb';ctx.fillText(text,250,210);
+  ctx.font='bold 56px "PingFang SC","Microsoft YaHei",sans-serif';ctx.fillStyle='#e05c5c';
+  ctx.fillText(pct,250,310);
+  ctx.font='18px "PingFang SC","Microsoft YaHei",sans-serif';ctx.fillStyle='#999';
+  ctx.fillText(desc,250,350);
+  ctx.font='16px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText(sub,250,400);
+  ctx.font='14px "PingFang SC","Microsoft YaHei",sans-serif';ctx.fillStyle='#ccc';
+  ctx.fillText('张哲的爱情测试',250,550);
+  // 二维码占位
+  ctx.fillStyle='#333';ctx.fillRect(190,580,120,120);
+  ctx.fillStyle='#fff';ctx.font='14px "PingFang SC","Microsoft YaHei",sans-serif';
+  ctx.fillText('扫一扫 来测',250,648);
+  // 下载
+  cv.toBlob(function(b){var a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='张哲的爱情测试.png';a.click()});
+}
+function roundRect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.lineTo(x+w-r,y);ctx.quadraticCurveTo(x+w,y,x+w,y+r);ctx.lineTo(x+w,y+h-r);ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);ctx.lineTo(x+r,y+h);ctx.quadraticCurveTo(x,y+h,x,y+h-r);ctx.lineTo(x,y+r);ctx.quadraticCurveTo(x,y,x+r,y);ctx.closePath()}
 
-    function answerText(val) {
-      var x = (val || '').trim();
-      if (!x) return;
-      var q = QUESTIONS[currentQ];
-      var yesKeywords = ['喜欢','是','对','好','要','帅','愿意','当然','超','很','爱'];
-      var isYes = yesKeywords.some(function(k){ return x.indexOf(k) !== -1; });
-      if (isYes) { yesCount++; earnedWeight += q.weight; }
-      nextQuestion();
-    }
+/* ============ 数字动画 ============ */
+function animateNumber(id,from,to,dur){
+  var el=document.getElementById(id),st=null;
+  function step(ts){if(!st)st=ts;var p=Math.min((ts-st)/dur,1);el.textContent=Math.round(from+(to-from)*p)+'%';if(p<1)requestAnimationFrame(step)}
+  requestAnimationFrame(step);
+}
 
-    function nextQuestion() {
-      currentQ++;
-      if (currentQ < QUESTIONS.length) {
-        showQuestion();
-      } else {
-        showResult();
-      }
-    }
+/* ============ 分享链接 ============ */
+(function(){
+  var u=window.location.href;var t=u.startsWith('file://')?'请将此文件发给朋友，用浏览器打开即可':u;
+  var s=document.getElementById('shareUrl');if(s)s.textContent=t;
+  var cs=document.getElementById('cpShareUrl');if(cs)cs.textContent=t;
+})();
+function copyLink(){
+  var u=window.location.href;
+  if(u.startsWith('file://')){alert('当前是本地文件，请先把文件发给朋友！\n\n方法：微信/QQ 发送文件，或上传到网盘分享');return}
+  navigator.clipboard.writeText(u).then(function(){
+    var btns=[document.getElementById('copyBtn'),document.getElementById('cpCopyBtn')];
+    btns.forEach(function(b){if(b){b.textContent='已复制！✅';b.classList.add('copy-ok');setTimeout(function(){b.textContent='复制链接';b.classList.remove('copy-ok')},2000)}});
+  });
+}
 
-    // ===== 显示结果 =====
-    function showResult() {
-      document.getElementById('quizScreen').style.display = 'none';
-      var rs = document.getElementById('resultScreen');
-      rs.style.display = 'block';
+/* ============ 单人模式逻辑 ============ */
+var playerName='',currentQ=0,yesCount=0,totalWeight=0,earnedWeight=0,perQScore=[];
 
-      var pct = Math.round(earnedWeight / totalWeight * 100);
-      // 基础分 + 答题得分
-      pct = Math.min(100, Math.max(5, pct));
+function startQuiz(){
+  var n=document.getElementById('playerName').value.trim();if(!n){document.getElementById('playerName').focus();return}
+  playerName=n;currentQ=0;yesCount=0;earnedWeight=0;perQScore=[];
+  totalWeight=QUESTIONS.reduce(function(s,q){return s+q.weight},0);
+  document.getElementById('nameScreen').style.display='none';
+  document.getElementById('quizScreen').style.display='block';
+  playMelody();showQuestion();
+}
+function showQuestion(){
+  var q=QUESTIONS[currentQ];
+  document.getElementById('questionText').textContent=q.text;
+  document.getElementById('btnYes').textContent=q.yesLabel;
+  document.getElementById('btnNo').textContent=q.noLabel;
+  document.getElementById('ans').value='';
+  document.getElementById('progressBar').style.width=Math.round((currentQ+1)/QUESTIONS.length*100)+'%';
+  document.getElementById('progressLabel').textContent=(currentQ+1)+' / '+QUESTIONS.length;
+}
+function answer(type){
+  var q=QUESTIONS[currentQ];var isY=type==='yes';
+  if(isY){yesCount++;earnedWeight+=q.weight}perQScore.push(isY?100:10);
+  nextQuestion();
+}
+function answerText(val){var x=(val||'').trim();if(!x)return;var q=QUESTIONS[currentQ];var isY=YES_KW.some(function(k){return x.indexOf(k)!==-1});if(isY){yesCount++;earnedWeight+=q.weight}perQScore.push(isY?100:10);currentQ++;nextScreen();}
+function nextQuestion(){currentQ++;nextScreen();}
+function nextScreen(){
+  if(currentQ<QUESTIONS.length){showQuestion()}else{showResult()}
+}
+function showResult(){
+  stopMusic();playResultFanfare();
+  document.getElementById('quizScreen').style.display='none';
+  var rs=document.getElementById('resultScreen');rs.style.display='block';rs.classList.add('show');
+  var pct=Math.round(earnedWeight/totalWeight*100);pct=Math.min(100,Math.max(5,pct));
+  var box=document.getElementById('resultBox'),isY=yesCount>=Math.ceil(QUESTIONS.length/2);
+  document.getElementById('resEmoji').textContent=isY?'❤️':'💙';
+  document.getElementById('resText').textContent=isY?('张哲爱'+playerName+'！'):('张哲不爱'+playerName);
+  document.getElementById('resSub').textContent=isY?'你们有那么多共同点，缘分天注定~':'差一点点哦，多了解张哲再来试试吧~';
+  box.className='result-box '+(isY?'yes':'no');
+  document.getElementById('meterDesc').textContent=pct>=80?'天作之合 💕':pct>=60?'缘分不浅 😊':pct>=40?'还需努力 💪':'继续加油 🌱';
+  setTimeout(function(){
+    document.getElementById('meterBar').style.width=pct+'%';animateNumber('meterPct',0,pct,900);
+  },200);
+  drawRadar('radarCanvas',perQScore,['游戏','美食','作息','默契','颜值']);
+  document.getElementById('loveLetterWrap').style.display='none';LETTERS=null;
+  if(isY)setTimeout(launchConfetti,300);
+  rs.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function resetAll(){
+  stopMusic();playerName='';currentQ=0;yesCount=0;earnedWeight=0;perQScore=[];
+  document.getElementById('playerName').value='';
+  document.getElementById('quizScreen').style.display='none';
+  var rs=document.getElementById('resultScreen');rs.style.display='none';rs.classList.remove('show');
+  document.getElementById('nameScreen').style.display='block';
+  document.getElementById('meterBar').style.width='0%';
+  document.getElementById('loveLetterWrap').style.display='none';LETTERS=null;
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 
-      var box = document.getElementById('resultBox');
-      var emoji = document.getElementById('resEmoji');
-      var text  = document.getElementById('resText');
-      var sub   = document.getElementById('resSub');
-
-      if (yesCount >= Math.ceil(QUESTIONS.length / 2)) {
-        box.className  = 'result-box yes';
-        emoji.textContent = '❤️';
-        text.textContent  = '张哲爱' + playerName + '！';
-        sub.textContent   = '你们有那么多共同点，缘分天注定~';
-        setTimeout(function(){ launchConfetti(); }, 300);
-      } else {
-        box.className  = 'result-box no';
-        emoji.textContent = '💙';
-        text.textContent  = '张哲不爱' + playerName;
-        sub.textContent   = '差一点点哦，多了解张哲再来试试吧~';
-      }
-
-      // 缘分仪表盘动画
-      var desc = pct >= 80 ? '天作之合 💕' : pct >= 60 ? '缘分不浅 😊' : pct >= 40 ? '还需努力 💪' : '继续加油 🌱';
-      document.getElementById('meterDesc').textContent = desc;
-      setTimeout(function(){
-        document.getElementById('meterBar').style.width = pct + '%';
-        animateNumber('meterPct', 0, pct, 900);
-      }, 200);
-
-      rs.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-
-    function animateNumber(id, from, to, duration) {
-      var el = document.getElementById(id);
-      var start = null;
-      function step(ts) {
-        if (!start) start = ts;
-        var prog = Math.min((ts - start) / duration, 1);
-        var val = Math.round(from + (to - from) * prog);
-        el.textContent = val + '%';
-        if (prog < 1) requestAnimationFrame(step);
-      }
-      requestAnimationFrame(step);
-    }
-
-    // ===== 重置 =====
-    function resetAll() {
-      playerName = ''; currentQ = 0; yesCount = 0; earnedWeight = 0;
-      document.getElementById('playerName').value = '';
-      document.getElementById('quizScreen').style.display = 'none';
-      document.getElementById('resultScreen').style.display = 'none';
-      document.getElementById('nameScreen').style.display = 'block';
-      document.getElementById('meterBar').style.width = '0%';
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-
-    // ===== 复制链接 =====
-    function copyLink() {
-      var url = window.location.href;
-      if (url.startsWith('file://')) {
-        alert('当前是本地文件，请先把文件发给朋友！\n\n方法：微信/QQ 发送文件，或上传到网盘分享');
-        return;
-      }
-      if (navigator.clipboard) {
-        navigator.clipboard.writeText(url).then(function() {
-          var btn = document.getElementById('copyBtn');
-          btn.textContent = '已复制！✅';
-          btn.classList.add('copy-ok');
-          setTimeout(function() {
-            btn.textContent = '复制链接';
-            btn.classList.remove('copy-ok');
-          }, 2000);
-        });
-      }
-    }
-
-    // ===== 撒花动画 =====
-    var CONFETTI_COLORS = ['#e05c5c','#f7b731','#5c89e0','#2ecc71','#9b59b6','#fd79a8','#fdcb6e'];
-    function launchConfetti() {
-      var count = 80;
-      for (var i = 0; i < count; i++) {
-        (function(delay) {
-          setTimeout(function() {
-            var el = document.createElement('div');
-            el.className = 'confetti-piece';
-            var size = 6 + Math.random() * 8;
-            el.style.cssText = [
-              'left:' + (Math.random() * 100) + 'vw',
-              'top:-20px',
-              'width:' + size + 'px',
-              'height:' + size + 'px',
-              'background:' + CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
-              'border-radius:' + (Math.random() > 0.5 ? '50%' : '2px'),
-              'animation-duration:' + (1.5 + Math.random() * 2) + 's',
-              'animation-delay:0s'
-            ].join(';');
-            document.body.appendChild(el);
-            setTimeout(function(){ el.remove(); }, 4000);
-          }, delay);
-        })(i * 25);
-      }
-    }
-  </script>
+/* ============ 情侣模式逻辑 ============ */
+var cpName1='',cpName2='',cpCurrent=0,cpScore1=[],cpScore2=[],cpPct1=0,cpPct2=0;
+function startCouple1(){
+  cpName1=document.getElementById('cpName1').value.trim();if(!cpName1){document.getElementById('cpName1').focus();return}
+  cpCurrent=0;cpScore1=[];cpScore2=[];
+  document.getElementById('coupleScreen1').style.display='none';
+  document.getElementById('coupleQuiz1').style.display='block';
+  playMelody();cpShowQ('cpQuestionText','cpBtnYes','cpBtnNo','cpProgressBar','cpProgressLabel');
+}
+function cpShowQ(qId,yId,nId,pbId,plId){
+  var q=QUESTIONS[cpCurrent];
+  document.getElementById(qId).textContent=q.text;
+  document.getElementById(yId).textContent=q.yesLabel;
+  document.getElementById(nId).textContent=q.noLabel;
+  document.getElementById(pbId).style.width=Math.round((cpCurrent+1)/QUESTIONS.length*100)+'%';
+  document.getElementById(plId).textContent=(cpCurrent+1)+' / '+QUESTIONS.length;
+}
+function cpAnswer(type){
+  var q=QUESTIONS[cpCurrent];if(type==='yes')cpScore1.push(100);else cpScore1.push(10);
+  cpNextQ('coupleQuiz1','coupleSwitch');
+}
+function cpAnswerText(val){
+  var x=(val||'').trim();if(!x)return;
+  var isY=YES_KW.some(function(k){return x.indexOf(k)!==-1});cpScore1.push(isY?100:10);
+  cpNextQ('coupleQuiz1','coupleSwitch');
+}
+function cpNextQ(hideId,showId){
+  cpCurrent++;if(cpCurrent<QUESTIONS.length){cpShowQ('cpQuestionText','cpBtnYes','cpBtnNo','cpProgressBar','cpProgressLabel')}else{
+    document.getElementById(hideId).style.display='none';
+    document.getElementById(showId).style.display='block';
+    cpCurrent=0;document.getElementById('ansCouple').value='';
+  }
+}
+function startCouple2(){
+  document.getElementById('coupleSwitch').style.display='none';
+  document.getElementById('coupleQuiz2').style.display='block';
+  cpShowQ('cp2QuestionText','cp2BtnYes','cp2BtnNo','cp2ProgressBar','cp2ProgressLabel');
+}
+function cp2Answer(type){
+  var q=QUESTIONS[cpCurrent];if(type==='yes')cpScore2.push(100);else cpScore2.push(10);
+  cp2Next();
+}
+function cp2AnswerText(val){
+  var x=(val||'').trim();if(!x)return;
+  var isY=YES_KW.some(function(k){return x.indexOf(k)!==-1});cpScore2.push(isY?100:10);
+  cp2Next();
+}
+function cp2Next(){
+  cpCurrent++;if(cpCurrent<QUESTIONS.length){cpShowQ('cp2QuestionText','cp2BtnYes','cp2BtnNo','cp2ProgressBar','cp2ProgressLabel')}else{showCoupleResult()}
+}
+function showCoupleResult(){
+  stopMusic();playResultFanfare();
+  document.getElementById('coupleQuiz2').style.display='none';
+  var rs=document.getElementById('resultCoupleScreen');rs.style.display='block';rs.classList.add('show');
+  cpPct1=Math.round(cpScore1.reduce(function(a,b){return a+b},0)/cpScore1.length);
+  cpPct2=Math.round(cpScore2.reduce(function(a,b){return a+b},0)/cpScore2.length);
+  var match=Math.round(100-Math.abs(cpPct1-cpPct2));
+  document.getElementById('cpName1Display').textContent=cpName1+'：缘分'+cpPct1+'%';
+  document.getElementById('cpName2Display').textContent=cpName2+'：缘分'+cpPct2+'%';
+  setTimeout(function(){document.getElementById('cpMeter1').style.width=cpPct1+'%';document.getElementById('cpMeter2').style.width=cpPct2+'%'},300);
+  document.getElementById('cpPct1Display').textContent=cpPct1+'%';
+  document.getElementById('cpPct2Display').textContent=cpPct2+'%';
+  var mp=document.getElementById('cpMatchPct');mp.textContent=match+'%';
+  mp.className='match-pct '+(match>=80?'high':match>=50?'mid':'low');
+  document.getElementById('cpMatchComment').textContent=match>=80?'你们是天造地设的一对！💕':match>=50?'缘分不错，多了解会更好~ 😊':'差异有点大，但互补也是一种美！🌱';
+  document.getElementById('cpResEmoji').textContent=match>=60?'❤️':'💙';
+  document.getElementById('cpResSub').textContent=cpName1+' vs '+cpName2;
+  if(match>=60)setTimeout(launchConfetti,300);
+  rs.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function resetCouple(){
+  stopMusic();cpName1='';cpName2='';cpCurrent=0;cpScore1=[];cpScore2=[];
+  document.getElementById('cpName1').value='';
+  document.getElementById('coupleQuiz1').style.display='none';
+  document.getElementById('coupleSwitch').style.display='none';
+  document.getElementById('coupleQuiz2').style.display='none';
+  var rs=document.getElementById('resultCoupleScreen');rs.style.display='none';rs.classList.remove('show');
+  document.getElementById('coupleScreen1').style.display='block';
+  document.getElementById('cpMeter1').style.width='0%';
+  document.getElementById('cpMeter2').style.width='0%';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+</script>
 </body>
 </html>
